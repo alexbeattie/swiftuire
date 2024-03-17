@@ -239,7 +239,25 @@ struct PropertyDescriptionView: View {
                         FeatureSection(title: "Disclosures", features: lotDisclosures)
                     }
                     if let constructionMaterials = value.ConstructionMaterials, !constructionMaterials.isEmpty {
-                        FeatureSection(title: "Construction Materials", features: constructionMaterials)
+                        FeatureSection(title: "Materials", features: constructionMaterials)
+                    }
+                    if let coolingSystem = value.Cooling, !coolingSystem.isEmpty {
+                        FeatureSection(title: "Cooling", features: coolingSystem)
+                    }
+                    if let heatingSystem = value.Heating, !heatingSystem.isEmpty {
+                        FeatureSection(title: "Heating", features: heatingSystem)
+                    }
+                    if let interiorFeatures = value.InteriorFeatures, !interiorFeatures.isEmpty {
+                        FeatureSection(title: "Interior", features: interiorFeatures)
+                    }
+                    if let viewFeatures = value.View, !viewFeatures.isEmpty {
+                        FeatureSection(title: "View Features", features: viewFeatures)
+                    }
+                    if let windowFeatures = value.WindowFeatures, !windowFeatures.isEmpty {
+                        FeatureSection(title: "Window Features", features: windowFeatures)
+                    }
+                    if let applianceFeatures = value.Appliances, !applianceFeatures.isEmpty {
+                        FeatureSection(title: "Appliances", features: applianceFeatures)
                     }
                 }
                 .padding(.leading, 0) // Remove the leading padding
@@ -379,6 +397,14 @@ extension Value {
             CommunityFeatures: ["Park", "Playground", "Walking Trails"],
             Disclosures: ["Seller's Disclosure", "HOA Disclosure"],
             LotFeatures: ["Fenced Yard", "Patio", "Garden"],
+            Cooling: [],
+            Heating: [],
+            Electric: [],
+            Flooring: [],
+            InteriorFeatures: [],
+            View: [],
+            WindowFeatures:[],
+            Appliances: [],
             ConstructionMaterials: [],
             BuyerAgentEmail: "buyer@example.com",
             ClosePrice: 350000,

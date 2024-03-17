@@ -32,6 +32,14 @@ struct Value: Codable, Equatable, Identifiable {
     let CommunityFeatures: [String]?
     let Disclosures: [String]?
     let LotFeatures: [String]?
+    let Cooling: [String]?
+    let Heating: [String]?
+    let Electric: [String]?
+    let Flooring: [String]?
+    let InteriorFeatures: [String]?
+    let View: [String]?
+    let WindowFeatures:[String]?
+    let Appliances: [String]?
     let ConstructionMaterials: [String]?
     var id: String { return self.ListingKey ?? "" }
     var BuyerAgentEmail: String?
@@ -72,6 +80,7 @@ struct Value: Codable, Equatable, Identifiable {
     var StreetSuffix: String?
     var StreetName: String?
     var MemberKey: String?
+    var Association_sp_Information_co_Association_sp_Name: String?
     var formattedLaunchDate: String {
         ListingContractDate?.formatted(date: .abbreviated, time: .omitted) ?? ""
     }
