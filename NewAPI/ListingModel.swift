@@ -6,33 +6,10 @@
 //
 
 import Foundation
-//extension Listing: Equatable {
-//    static func == (lhs: Listing, rhs: Listing) -> Bool {
-//        return
-//            lhs.odataCount == rhs.odataCount &&
-//            lhs.odataNextLink == rhs.odataNextLink &&
-//            lhs.odataContext == rhs.odataContext
-//    }
-//}
+
 extension Listing: Equatable {}
 
 struct Listing: Codable {
-//    static func == (lhs: Listing, rhs: Listing) -> Bool {
-//        return lhs.odataCount == rhs.odataCount
-//    }
-//    
-//    var id = UUID()
-    
-//    var id: UUID()
-//    
-//    func hash(into hasher: inout Hasher) {
-//        hasher.combine(id)
-//    }
-//    static func == (lhs: Listing, rhs: Listing) -> Bool {
-//        return lhs.odataCount == rhs.odataCount
-//
-//    }
-//    
     
     let odataContext: String?
     let odataNextLink: String?
@@ -46,7 +23,6 @@ struct Listing: Codable {
            case value = "value"
        }
 }
-//extension Value: Equatable {}
 
 struct Value: Codable, Equatable, Identifiable {
     static func == (lhs: Value, rhs: Value) -> Bool {
@@ -56,6 +32,7 @@ struct Value: Codable, Equatable, Identifiable {
     let CommunityFeatures: [String]?
     let Disclosures: [String]?
     let LotFeatures: [String]?
+    let ConstructionMaterials: [String]?
     var id: String { return self.ListingKey ?? "" }
     var BuyerAgentEmail: String?
     var ClosePrice: Int?

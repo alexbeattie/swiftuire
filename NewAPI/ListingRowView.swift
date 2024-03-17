@@ -54,10 +54,10 @@ struct ListingRowView_Previews: PreviewProvider {
             CommunityFeatures: [],
             Disclosures: [],
             LotFeatures: [],
+            ConstructionMaterials: [],
             BedroomsTotal: 3,
             StateOrProvince: "CA",
             City: "Anytown",
-            
             BathroomsTotalInteger: 2,
             BuildingAreaTotal: 1500,
             StreetNumber: "123",

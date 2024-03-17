@@ -20,38 +20,35 @@ struct PopDetailsView: View {
     }
     
     var body: some View {
-        ScrollView(showsIndicators: false) {
             VStack {
-                ImageCarouselView(media: value.Media ?? [])
-                    .frame(height: 320)
+                ScrollView(showsIndicators: false) {
+                    VStack {
+                        ImageCarouselView(media: value.Media ?? [])
+                            .frame(height: 320)
+                        
+                        PropertyDetailsView(value: value)
+                            .padding(.horizontal)
+                        
+                        Spacer()
+                        
+                        
+                      
+                        
+                        PropertyDescriptionView(value: value)
+                            .padding()
+                        
+                        Divider()
+                    }
+                }
                 
-                PropertyDetailsView(value: value)
-                    .padding(.horizontal)
-                
-                Spacer()
-                
-                WebsiteLinkView(value: value)
-                
-                PropertyDescriptionView(value: value)
-                    .padding()
-                
-                Divider()
-                
-//                FullScreenMapToggle(isFullScreen: $isFullScreen)
-//                    .padding()
                 MapView(value: value, selectedAnnotation: $selectedAnnotation, directionsMapItem: $directionsMapItem)
-                    .frame(height: isFullScreen ? UIScreen.main.bounds.height : 200)
-                    .edgesIgnoringSafeArea(isFullScreen ? .all : [])
-
+                    .frame(height: 200)
+                    .edgesIgnoringSafeArea(.bottom)
             }
-            .ignoresSafeArea()
+            .edgesIgnoringSafeArea(.bottom)
+        
         }
-        .transition(.slide)
     }
-
-
-}
-
 struct ImageCarouselView: View {
     let media: [Value.Media]
     
@@ -107,12 +104,27 @@ struct PropertyDetailsView: View {
                 }
                 
             }
+
         }
+        
         
     }
     
 }
-
+struct WebsiteLinkView: View {
+    let value: Value
+    
+    var body: some View {
+        HStack {
+            if let documentMedia = value.Media?.first(where: { $0.MediaCategory == "Document" }),
+               let mediaURL = documentMedia.MediaURL {
+                Link(destination: URL(string: mediaURL)!) {
+                    Label("Download Document", systemImage: "arrow.down.doc")
+                }
+            }
+        }
+    }
+}
 struct PropertyDetailItem: View {
     let title: String
     let subtitle: String
@@ -143,17 +155,42 @@ struct PropertyDetailItem: View {
     }
 }
 
-struct WebsiteLinkView: View {
-    let value: Value
+
+
+struct FeatureSection: View {
+    let title: String
+    let features: [String]
+    @State private var expanded = false
     
     var body: some View {
-        HStack {
-            if let firstMedia = value.Media?.first, firstMedia.MediaCategory == "Document", let mediaURL = firstMedia.MediaURL {
-                Link("Website", destination: URL(string: mediaURL)!)
+        
+        VStack(alignment: .leading) {
+            
+            lowercaseSmallCaps(title)
+                .font(.system(size: 14, weight: .semibold))
+            Divider()
+            ForEach(expanded ? features : Array(features.prefix(3)), id: \.self) { feature in
+                Text(feature)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            
+            if features.count > 3 {
+                Button(action: {
+                    expanded.toggle()
+                }) {
+                    Text(expanded ? "Show Less" : "Show More")
+                        .font(.caption)
+                        .foregroundColor(.accentColor)
+                }
             }
         }
+        .background(ignoresSafeAreaEdges: .all)
+//        .foregroundColor(.orange)
+        .frame(width: 200)
     }
 }
+
 func lowercaseSmallCaps(_ text: String) -> some View {
     Text(text.uppercased())
 //        .font(.system(.body, design: .default))
@@ -163,120 +200,51 @@ func lowercaseSmallCaps(_ text: String) -> some View {
 
 struct PropertyDescriptionView: View {
     let value: Value
-    @State private var expandedAmenities = false
-    @State private var expandedCommunityFeatures = false
-    @State private var expandedLotFeatures = false
-    @State private var expandedDisclosures = false
+    
     var body: some View {
         VStack(alignment: .leading) {
             lowercaseSmallCaps(value.MlsStatus ?? "")
                 .font(.system(size: 14, weight: .heavy))
             
-            Text(value.PublicRemarks ?? "")
-                .font(.system(size: 14, weight: .regular))
-                .foregroundColor(.gray)
-                .lineLimit(nil)
-                .multilineTextAlignment(.leading)
             
+            VStack {
+                Text(value.PublicRemarks ?? "")
+                    .font(.system(size: 14, weight: .regular))
+                    .foregroundColor(.gray)
+                    .lineLimit(nil)
+                .multilineTextAlignment(.leading)
+            }
+            .padding(.vertical)
+            VStack {
+                WebsiteLinkView(value: value)
+            }
+            .padding(.vertical)
+
+
             ScrollView(.horizontal, showsIndicators: false) {
-                Group {
-                    HStack(alignment: .top) {
-                        if let amenities = value.AssociationAmenities, !amenities.isEmpty {
-                            VStack(alignment: .leading, spacing: 8) {
-                                lowercaseSmallCaps("Association Amenities")
-                                    .font(.system(size: 14, weight: .semibold))
-
-                                ForEach(expandedAmenities ? amenities : Array(amenities.prefix(3)), id: \.self) { amenity in
-                                    Text(amenity)
-                                }
-                                
-                                if amenities.count > 3 {
-                                    Button(action: {
-                                        expandedAmenities.toggle()
-                                    }) {
-                                        Text(expandedAmenities ? "Show Less" : "Show More")
-                                            .font(.caption)
-                                            .foregroundColor(.gray)
-                                    }
-                                }
-                            }
-                            .frame(width: 200)
-                        }
-                        
-                        if let communityFeatures = value.CommunityFeatures, !communityFeatures.isEmpty {
-                            VStack(alignment: .leading, spacing: 8) {
-                                lowercaseSmallCaps("Community Features")
-                                    .font(.system(size: 14, weight: .semibold))
-
-                                ForEach(expandedCommunityFeatures ? communityFeatures : Array(communityFeatures.prefix(3)), id: \.self) { feature in
-                                    Text(feature)
-                                }
-                                
-                                if communityFeatures.count > 3 {
-                                    Button(action: {
-                                        expandedCommunityFeatures.toggle()
-                                    }) {
-                                        Text(expandedCommunityFeatures ? "Show Less" : "Show More")
-                                            .font(.caption)
-                                            .foregroundColor(.gray)
-                                    }
-                                }
-                            }
-                            .frame(width: 200)
-                        }
-                        
-                        if let lotFeatures = value.LotFeatures, !lotFeatures.isEmpty {
-                            VStack(alignment: .leading, spacing: 8) {
-                                lowercaseSmallCaps("Lot Features")
-                                    .font(.system(size: 14, weight: .semibold))
-
-                                ForEach(expandedLotFeatures ? lotFeatures : Array(lotFeatures.prefix(3)), id: \.self) { feature in
-                                    Text(feature)
-                                        .font(.subheadline)
-                                }
-                                
-                                if lotFeatures.count > 3 {
-                                    Button(action: {
-                                        expandedLotFeatures.toggle()
-                                    }) {
-                                        Text(expandedLotFeatures ? "Show Less" : "Show More")
-                                            .font(.caption)
-                                            .foregroundColor(.gray)
-                                    }
-                                }
-                            }
-                            .frame(width: 200)
-                        }
-                        
-                        if let lotDisclosures = value.Disclosures, !lotDisclosures.isEmpty {
-                            VStack(alignment: .leading, spacing: 8) {
-                                lowercaseSmallCaps("Disclosures")
-                                    .font(.system(size: 14, weight: .semibold))
-
-                                ForEach(expandedDisclosures ? lotDisclosures : Array(lotDisclosures.prefix(3)), id: \.self) { disclosure in
-                                    Text(disclosure)
-                                        .font(.subheadline)
-                                }
-                                
-                                if lotDisclosures.count > 3 {
-                                    Button(action: {
-                                        expandedDisclosures.toggle()
-                                    }) {
-                                        Text(expandedDisclosures ? "Show Less" : "Show More")
-                                            .font(.caption)
-                                            .foregroundColor(.gray)
-                                    }
-                                }
-                            }
-                            .frame(width: 200)
-                        }
+                HStack(alignment: .top) {
+                    if let amenities = value.AssociationAmenities, !amenities.isEmpty {
+                        FeatureSection(title: "Association Amenities", features: amenities)
+                    }
+                    
+                    if let communityFeatures = value.CommunityFeatures, !communityFeatures.isEmpty {
+                        FeatureSection(title: "Community Features", features: communityFeatures)
+                    }
+                    
+                    if let lotFeatures = value.LotFeatures, !lotFeatures.isEmpty {
+                        FeatureSection(title: "Lot Features", features: lotFeatures)
+                    }
+                    
+                    if let lotDisclosures = value.Disclosures, !lotDisclosures.isEmpty {
+                        FeatureSection(title: "Disclosures", features: lotDisclosures)
+                    }
+                    if let constructionMaterials = value.ConstructionMaterials, !constructionMaterials.isEmpty {
+                        FeatureSection(title: "Construction Materials", features: constructionMaterials)
                     }
                 }
-                .padding(.leading, -12) // Remove the leading padding
-                
+                .padding(.leading, 0) // Remove the leading padding
             }
         }
-        
     }
 }
        
@@ -290,11 +258,9 @@ struct PropertyDescriptionView: View {
 
 struct MapView: UIViewRepresentable {
     let value: Value
-//    let isFullScreen: Bool
     @Binding var selectedAnnotation: MKAnnotation?
-//    @Binding var presentAlert: Bool
     @Binding var directionsMapItem: MKMapItem?
-
+    
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
     }
@@ -311,7 +277,7 @@ struct MapView: UIViewRepresentable {
         let annotation = MKPointAnnotation()
         annotation.coordinate = coordinate
         annotation.title = value.StreetName
-
+        
         let numberFormatter = NumberFormatter()
         numberFormatter.numberStyle = .decimal
         annotation.subtitle = numberFormatter.string(from: NSNumber(value: value.ListPrice ?? 0))
@@ -321,6 +287,7 @@ struct MapView: UIViewRepresentable {
     
     func makeUIView(context: Context) -> MKMapView {
         MKMapView(frame: .zero)
+            
     }
     
     class Coordinator: NSObject, MKMapViewDelegate {
@@ -329,6 +296,7 @@ struct MapView: UIViewRepresentable {
         init(_ parent: MapView) {
             self.parent = parent
         }
+        
         func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
             guard let annotation = view.annotation else { return }
             parent.selectedAnnotation = annotation
@@ -337,61 +305,67 @@ struct MapView: UIViewRepresentable {
             let mapItem = MKMapItem(placemark: placemark)
             mapItem.name = annotation.title ?? ""
             
-//            parent.presentAlert = true
             parent.directionsMapItem = mapItem
             
-                           let launchOptions = [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving]
-                           mapItem.openInMaps(launchOptions: launchOptions)
+            let launchOptions = [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving]
+            mapItem.openInMaps(launchOptions: launchOptions)
         }
+        
         func mapView(_ mapView: MKMapView, didDeselect view: MKAnnotationView) {
             parent.selectedAnnotation = nil
         }
+        
         func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
             guard !(annotation is MKUserLocation) else {
                 return nil
             }
             
             let annotationIdentifier = "AnnotationIdentifier"
-            var annotationView = mapView.dequeueReusableAnnotationView(withIdentifier: annotationIdentifier) as? MKMarkerAnnotationView
-            
-            if annotationView == nil {
-                annotationView = MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: annotationIdentifier)
-                annotationView?.canShowCallout = true
-                annotationView?.animatesWhenAdded = true
-                
-                let rightButton = UIButton(type: .detailDisclosure)
-                rightButton.frame = CGRect(x: 0, y: 0, width: 32, height: 32)
-                rightButton.setImage(UIImage(named: "small-pin-map-7"), for: .normal)
-                annotationView?.rightCalloutAccessoryView = rightButton
-//                annotationView?.isSelected = true
-                
-                let leftIconView = UIImageView()
-                leftIconView.frame = CGRect(x: 0, y: 0, width: 50, height: 50)
-                leftIconView.contentMode = .scaleAspectFill
-                leftIconView.clipsToBounds = true
-                
-                if let mediaURL = parent.value.Media?.first?.MediaURL, let url = URL(string: mediaURL) {
-                    leftIconView.kf.setImage(with: url, placeholder: UIImage(named: "placeholder"), options: [.transition(.fade(0.2))], completionHandler: { result in
-                        switch result {
-                        case .success(_):
-                            annotationView?.leftCalloutAccessoryView = leftIconView
-                        case .failure(_):
-                            leftIconView.image = UIImage(named: "placeholder")
-                            annotationView?.leftCalloutAccessoryView = leftIconView
-                        }
-                    })
-                } else {
-                    leftIconView.image = UIImage(named: "placeholder")
-                    annotationView?.leftCalloutAccessoryView = leftIconView
-                }
-            } else {
-                annotationView?.annotation = annotation
-            }
+            let annotationView = CustomAnnotationView(annotation: annotation, reuseIdentifier: annotationIdentifier, mediaURL: parent.value.Media?.first?.MediaURL)
+            annotationView.canShowCallout = true
+            annotationView.rightCalloutAccessoryView = UIButton(type: .detailDisclosure)
             
             return annotationView
         }
     }
 }
+
+class CustomAnnotationView: MKAnnotationView {
+    private let imageView: UIImageView = {
+        let imageView = UIImageView(frame: CGRect(x: 0, y: 0, width: 50, height: 50))
+        imageView.contentMode = .scaleAspectFill
+        imageView.clipsToBounds = true
+        imageView.layer.cornerRadius = 25
+        return imageView
+    }()
+    
+    init(annotation: MKAnnotation?, reuseIdentifier: String?, mediaURL: String?) {
+        super.init(annotation: annotation, reuseIdentifier: reuseIdentifier)
+        
+        frame = CGRect(x: 0, y: 0, width: 50, height: 50)
+        centerOffset = CGPoint(x: 0, y: -frame.size.height / 2)
+        
+        addSubview(imageView)
+        
+        if let mediaURL = mediaURL, let url = URL(string: mediaURL) {
+            KingfisherManager.shared.retrieveImage(with: url, options: nil, progressBlock: nil) { [weak self] result in
+                switch result {
+                case .success(let value):
+                    self?.imageView.image = value.image
+                case .failure(_):
+                    self?.imageView.image = UIImage(named: "placeholder")
+                }
+            }
+        } else {
+            imageView.image = UIImage(named: "placeholder")
+        }
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
 struct PopDetailsView_Previews: PreviewProvider {
     static var previews: some View {
         PopDetailsView(value: Value.sample())
@@ -405,6 +379,7 @@ extension Value {
             CommunityFeatures: ["Park", "Playground", "Walking Trails"],
             Disclosures: ["Seller's Disclosure", "HOA Disclosure"],
             LotFeatures: ["Fenced Yard", "Patio", "Garden"],
+            ConstructionMaterials: [],
             BuyerAgentEmail: "buyer@example.com",
             ClosePrice: 350000,
             CoListAgentFullName: "Jane Doe",
