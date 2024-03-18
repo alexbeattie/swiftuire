@@ -4,56 +4,77 @@ import Combine
 struct ContentView: View {
     @StateObject var vm = ListingPublisherViewModel()
     @State private var showingSheets: [String: Bool] = [:]
-
     @State private var destinationSearchView = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8.0) {
             NavigationView {
                 ScrollView {
-                    ForEach(vm.results, id: \.ListingKey) { listing in
-                        NavigationLink {
-                            NavigationLazyView(PopDetailsView(value: listing))
-                        } label: {
-                            VStack(alignment: .leading) {
-                                HStack {
-                                    AsyncImage(url: URL(string: listing.Media?.first?.MediaURL ?? "")) { image in
-                                        image
-                                            .resizable()
-                                            .scaledToFill()
-                                            .aspectRatio(contentMode: .fill)
-                                            .clipped()
-                                            .ignoresSafeArea()
-                                            .overlay(alignment: .bottom) {
-                                                ImageOverlayView(listing: listing)
-                                            }
-                                    } placeholder: {
+                    VStack {
+                        ForEach(vm.results, id: \.ListingKey) { listing in
+                            NavigationLink {
+                                NavigationLazyView(PopDetailsView(value: listing))
+                            } label: {
+                                VStack(alignment: .leading) {
+                                    HStack {
+                                        AsyncImage(url: URL(string: listing.Media?.first?.MediaURL ?? "")) { phase in
+                                            switch phase {
+                                            case .success(let image):
+                                                image
+                                                    .resizable()
+                                                    .aspectRatio(contentMode: .fill)
+                                                    .clipped()
+                                                    .ignoresSafeArea()
+                                                    .overlay(alignment: .bottom) {
+                                                        ImageOverlayView(listing: listing)
+                                                    }
+                                            case .failure(let error):
+                                                ProgressView()
+                                                        .frame(width: 50, height: 50)
+                                                        .progressViewStyle(CircularProgressViewStyle())
+                                                        .onAppear {
+                                                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                                                                // Retry loading the image after a 1-second delay
+                                                                // You can adjust the delay as needed
+                                                                vm.objectWillChange.send()
+                                                            }
+                                                        }
+                                            
+                                            case .empty:
                                                 ZStack {
-                                                    Color.black // Add a background color to the placeholder
+                                                    Color.black
                                                     
                                                     ProgressView()
                                                         .frame(width: 50, height: 50)
                                                         .progressViewStyle(CircularProgressViewStyle())
                                                 }
-                                                .frame(maxWidth: .infinity, maxHeight: .infinity) // Make the ZStack fill the available space
+                                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                            @unknown default:
+                                                EmptyView()
                                             }
                                         }
-                                
-//                                VStack(alignment: .center) {
-//                                    
-//                                    ListingRowView(listing: listing)
-//                                }
-//                                .padding(.horizontal)
-                                
-                                
-                                HStack(alignment: .center) {
-                                    ListingDetailsView(listing: listing)
-
+                                    }
+                                    
+                                    HStack(alignment: .center) {
+                                        ListingDetailsView(listing: listing)
+                                    }
                                 }
-//                                .padding(.horizontal)
+                            }
+                            .padding(.bottom)
+                        }
+                        
+                        if vm.isLoading {
+                            ProgressView()
+                        } else if vm.hasMoreData {
+                            Button(action: {
+                                Task {
+                                    await vm.fetchNextPage()
+                                }
+                            }) {
+                                Text("Load More")
+                                    .padding()
                             }
                         }
-                        .padding(.bottom)
                     }
                 }
                 .ignoresSafeArea()
@@ -65,6 +86,8 @@ struct ContentView: View {
         }
     }
 }
+
+ 
 
 struct ImageOverlayView: View {
     let listing: Value

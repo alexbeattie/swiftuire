@@ -8,9 +8,17 @@
 import SwiftUI
 
 @main
+
 struct NewAPIApp: App {
+    init() {
+           // Configure URLCache
+           URLCache.shared.memoryCapacity = 50 * 1024 * 1024 // 50 MB
+           URLCache.shared.diskCapacity = 100 * 1024 * 1024 // 100 MB
+       }
     var body: some Scene {
+        
         WindowGroup {
+            
             ContentView()
         }
     }

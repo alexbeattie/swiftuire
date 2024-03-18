@@ -16,6 +16,7 @@
 		786271902ACCECA000D257BE /* ListingPublisherViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7862718F2ACCECA000D257BE /* ListingPublisherViewModel.swift */; };
 		78688FB22AF54E6C00F99390 /* SearchAndFilterBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78688FB12AF54E6C00F99390 /* SearchAndFilterBar.swift */; };
 		786D66422BA6461900C9D744 /* ListingsMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 786D66412BA6461900C9D744 /* ListingsMapView.swift */; };
+		786D66462BA7C88600C9D744 /* CachedAsyncImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 786D66452BA7C88600C9D744 /* CachedAsyncImage.swift */; };
 		78769F5A2AC78CA5006B9404 /* BundleTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78769F592AC78CA5006B9404 /* BundleTest.swift */; };
 		78769F5C2AC7917E006B9404 /* Color-Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78769F5B2AC7917E006B9404 /* Color-Theme.swift */; };
 		78769F5E2AC9E900006B9404 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78769F5D2AC9E900006B9404 /* Constants.swift */; };
@@ -37,6 +38,7 @@
 		7862718F2ACCECA000D257BE /* ListingPublisherViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListingPublisherViewModel.swift; sourceTree = "<group>"; };
 		78688FB12AF54E6C00F99390 /* SearchAndFilterBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchAndFilterBar.swift; sourceTree = "<group>"; };
 		786D66412BA6461900C9D744 /* ListingsMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListingsMapView.swift; sourceTree = "<group>"; };
+		786D66452BA7C88600C9D744 /* CachedAsyncImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CachedAsyncImage.swift; sourceTree = "<group>"; };
 		78769F592AC78CA5006B9404 /* BundleTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundleTest.swift; sourceTree = "<group>"; };
 		78769F5B2AC7917E006B9404 /* Color-Theme.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Color-Theme.swift"; sourceTree = "<group>"; };
 		78769F5D2AC9E900006B9404 /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
@@ -82,6 +84,7 @@
 				7862718D2ACCEC5E00D257BE /* ListingModel.swift */,
 				7862718F2ACCECA000D257BE /* ListingPublisherViewModel.swift */,
 				786033962ABB696E0083536A /* ContentView.swift */,
+				786D66452BA7C88600C9D744 /* CachedAsyncImage.swift */,
 				78769F5B2AC7917E006B9404 /* Color-Theme.swift */,
 				78BEB1C02AC5D38100BC2EC1 /* PopDetailsView.swift */,
 				78E6AC0B2AE8B3EB00439860 /* ListingImageCarouselView.swift */,
@@ -182,6 +185,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7862718E2ACCEC5E00D257BE /* ListingModel.swift in Sources */,
+				786D66462BA7C88600C9D744 /* CachedAsyncImage.swift in Sources */,
 				786033972ABB696E0083536A /* ContentView.swift in Sources */,
 				786D66422BA6461900C9D744 /* ListingsMapView.swift in Sources */,
 				786178612B99061700244C25 /* ListingRowView.swift in Sources */,

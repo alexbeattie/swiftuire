@@ -22,6 +22,36 @@ struct Listing: Codable {
            case odataCount = "@odata.count"
            case value = "value"
        }
+    func fetchNextPage(completion: @escaping (Result<Listing, Error>) -> Void) {
+           guard let nextLink = odataNextLink else {
+               completion(.failure(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "No more pages available"])))
+               return
+           }
+
+           guard let url = URL(string: nextLink) else {
+               completion(.failure(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "Invalid URL"])))
+               return
+           }
+
+           URLSession.shared.dataTask(with: url) { data, response, error in
+               if let error = error {
+                   completion(.failure(error))
+                   return
+               }
+
+               guard let data = data else {
+                   completion(.failure(NSError(domain: "", code: 0, userInfo: [NSLocalizedDescriptionKey: "No data received"])))
+                   return
+               }
+
+               do {
+                   let nextListing = try JSONDecoder().decode(Listing.self, from: data)
+                   completion(.success(nextListing))
+               } catch {
+                   completion(.failure(error))
+               }
+           }.resume()
+       }
 }
 
 struct Value: Codable, Equatable, Identifiable {
