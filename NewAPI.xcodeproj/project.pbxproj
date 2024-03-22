@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7810733E2BA9EC7200CE48F7 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7810733D2BA9EC7200CE48F7 /* MainTabView.swift */; };
+		78484CF42BA9F02A00047ED5 /* NewMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78484CF32BA9F02A00047ED5 /* NewMapView.swift */; };
 		786033952ABB696E0083536A /* NewAPIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 786033942ABB696E0083536A /* NewAPIApp.swift */; };
 		786033972ABB696E0083536A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 786033962ABB696E0083536A /* ContentView.swift */; };
 		786033992ABB696F0083536A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 786033982ABB696F0083536A /* Assets.xcassets */; };
@@ -27,6 +29,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		7810733D2BA9EC7200CE48F7 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		78484CF32BA9F02A00047ED5 /* NewMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewMapView.swift; sourceTree = "<group>"; };
 		786033912ABB696E0083536A /* NewAPI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NewAPI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		786033942ABB696E0083536A /* NewAPIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewAPIApp.swift; sourceTree = "<group>"; };
 		786033962ABB696E0083536A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -81,6 +85,8 @@
 				786033A22ABB6FA90083536A /* Info.plist */,
 				786D66412BA6461900C9D744 /* ListingsMapView.swift */,
 				786033942ABB696E0083536A /* NewAPIApp.swift */,
+				7810733D2BA9EC7200CE48F7 /* MainTabView.swift */,
+				78484CF32BA9F02A00047ED5 /* NewMapView.swift */,
 				7862718D2ACCEC5E00D257BE /* ListingModel.swift */,
 				7862718F2ACCECA000D257BE /* ListingPublisherViewModel.swift */,
 				786033962ABB696E0083536A /* ContentView.swift */,
@@ -195,8 +201,10 @@
 				78E6AC0C2AE8B3EB00439860 /* ListingImageCarouselView.swift in Sources */,
 				78BEB1C12AC5D38100BC2EC1 /* PopDetailsView.swift in Sources */,
 				78688FB22AF54E6C00F99390 /* SearchAndFilterBar.swift in Sources */,
+				7810733E2BA9EC7200CE48F7 /* MainTabView.swift in Sources */,
 				78769F5E2AC9E900006B9404 /* Constants.swift in Sources */,
 				78769F5A2AC78CA5006B9404 /* BundleTest.swift in Sources */,
+				78484CF42BA9F02A00047ED5 /* NewMapView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -333,7 +341,10 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = NewAPI/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "";
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "This app may need to use your location";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "This app uses location when used";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -365,7 +376,10 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = NewAPI/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "";
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "This app may need to use your location";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "This app uses location when used";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

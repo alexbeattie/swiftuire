@@ -103,7 +103,7 @@ struct Value: Codable, Equatable, Identifiable {
     var BuyerAgentMlsId: String?
     var BuyerOfficePhone: String?
     var CloseDate: String?
-    var ListingContractDate: Date?
+//    var ListingContractDate: Date?
     var ListingId: String?
     var LivingArea: Int?
     var StreetNumber: String?
@@ -111,9 +111,9 @@ struct Value: Codable, Equatable, Identifiable {
     var StreetName: String?
     var MemberKey: String?
     var Association_sp_Information_co_Association_sp_Name: String?
-    var formattedLaunchDate: String {
-        ListingContractDate?.formatted(date: .abbreviated, time: .omitted) ?? ""
-    }
+//    var formattedLaunchDate: String {
+//        ListingContractDate?.formatted(date: .abbreviated, time: .omitted) ?? ""
+//    }
     
     struct Media: Codable {
         var MediaCategory: String?

@@ -35,7 +35,6 @@ class ImageLoader: ObservableObject {
     @Published var image: UIImage?
     
     private(set) var isLoading = false
-    
     private let url: URL?
     private var cache: ImageCache?
     

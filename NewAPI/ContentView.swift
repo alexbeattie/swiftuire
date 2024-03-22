@@ -7,6 +7,8 @@ struct ContentView: View {
     @State private var destinationSearchView = false
     
     var body: some View {
+//        MainTabView()
+
         VStack(alignment: .leading, spacing: 8.0) {
             NavigationView {
                 ScrollView {
@@ -28,7 +30,7 @@ struct ContentView: View {
                                                     .overlay(alignment: .bottom) {
                                                         ImageOverlayView(listing: listing)
                                                     }
-                                            case .failure(let error):
+                                            case .failure(_):
                                                 ProgressView()
                                                         .frame(width: 50, height: 50)
                                                         .progressViewStyle(CircularProgressViewStyle())
@@ -66,14 +68,23 @@ struct ContentView: View {
                         if vm.isLoading {
                             ProgressView()
                         } else if vm.hasMoreData {
-                            Button(action: {
-                                Task {
-                                    await vm.fetchNextPage()
-                                }
-                            }) {
-                                Text("Load More")
-                                    .padding()
+                            
+                            HStack {
+                                Button(action: {
+                                    Task {
+                                        await vm.fetchNextPage()
+                                    }
+                                    
+                                }) {
+                                    Label("Load More", systemImage: "arrow.forward")
+                                        .font(.system(size: 14, weight: .regular))
+                                        .foregroundColor(.gray)
+
+//                                    Text("Load More")
+//                                        .padding(EdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10))
                             }
+                            }
+                            .padding(EdgeInsets(top: 10, leading: 10, bottom: 100, trailing: 10))
                         }
                     }
                 }

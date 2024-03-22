@@ -86,7 +86,7 @@ extension Value {
             BuyerAgentMlsId: "12345",
             BuyerOfficePhone: "555-1234",
             CloseDate: nil,
-            ListingContractDate: Date(),
+//            ListingContractDate: Date(),
             ListingId: "XYZ789",
             LivingArea: 1500,
             StreetNumber: "123",

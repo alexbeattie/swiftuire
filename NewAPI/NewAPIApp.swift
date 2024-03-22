@@ -19,7 +19,7 @@ struct NewAPIApp: App {
         
         WindowGroup {
             
-            ContentView()
+            MainTabView()
         }
     }
 }

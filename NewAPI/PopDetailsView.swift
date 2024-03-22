@@ -38,12 +38,18 @@ struct PopDetailsView: View {
                             .padding()
                         
                         Divider()
+                        MapView(value: value, selectedAnnotation: $selectedAnnotation, directionsMapItem: $directionsMapItem)
+                            .frame(height: 200)
+                            .clipShape(RoundedRectangle(cornerRadius:12))
+                            .edgesIgnoringSafeArea(.bottom)
                     }
                 }
-                
-                MapView(value: value, selectedAnnotation: $selectedAnnotation, directionsMapItem: $directionsMapItem)
-                    .frame(height: 200)
-                    .edgesIgnoringSafeArea(.bottom)
+//                MapView(value: value)
+//                    .frame(height:200)
+//                    .clipShape(RoundedRectangle(cornerRadius:12))
+//                    .edgesIgnoringSafeArea(.bottom)
+
+           
             }
             .edgesIgnoringSafeArea(.bottom)
         
@@ -342,7 +348,6 @@ struct MapView: UIViewRepresentable {
             let annotationView = CustomAnnotationView(annotation: annotation, reuseIdentifier: annotationIdentifier, mediaURL: parent.value.Media?.first?.MediaURL)
             annotationView.canShowCallout = true
             annotationView.rightCalloutAccessoryView = UIButton(type: .detailDisclosure)
-            
             return annotationView
         }
     }
@@ -440,7 +445,7 @@ extension Value {
             BuyerAgentMlsId: "12345",
             BuyerOfficePhone: "555-1234",
             CloseDate: nil,
-            ListingContractDate: Date(),
+//            ListingContractDate: Date(),
             ListingId: "XYZ789",
             LivingArea: 1500,
             StreetNumber: "123",
