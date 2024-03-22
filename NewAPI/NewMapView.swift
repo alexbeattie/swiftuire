@@ -137,18 +137,36 @@ struct SoldLocationCell: View {
 struct SoldLocationsCarousel: View {
     @Binding var selectedItem: SoldListingsAnno?
     let items: [SoldListingsAnno]
+    let onItemSelected: (SoldListingsAnno) -> Void
     
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 12) {
-                ForEach(items, id: \.self) { item in
-                    SoldLocationCell(item: item)
-                        .onTapGesture {
-                            selectedItem = item
+        GeometryReader { geometry in
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(items, id: \.self) { item in
+                            SoldLocationCell(item: item)
+                                .id(item.id)
+                                .frame(width: geometry.size.width - 64)
+                                .onTapGesture {
+                                    selectedItem = item
+                                    onItemSelected(item)
+                                    withAnimation {
+                                        proxy.scrollTo(item.id, anchor: .center)
+                                    }
+                                }
                         }
+                    }
+                    .padding(.horizontal, 32)
+                }
+                .onChange(of: selectedItem) { newValue in
+                    if let selectedItem = newValue {
+                        withAnimation {
+                            proxy.scrollTo(selectedItem.id, anchor: .center)
+                        }
+                    }
                 }
             }
-            .padding(.horizontal, 16)
         }
         .frame(height: 150)
     }
@@ -186,28 +204,43 @@ struct MapOfSoldListings: View {
         ZStack(alignment: .bottom) {
             Map(coordinateRegion: $region, annotationItems: viewModel.soldListings) { item in
                 MapAnnotation(coordinate: item.coordinate) {
-                    SoldCustomListingAnno(item: item) {
+                    SoldCustomListingAnno(item: item, isSelected: item.id == viewModel.selectedItem?.id) {
                         viewModel.selectedItem = item
+                        zoomToSelectedItem()
                     }
                 }
             }
             
-            SoldLocationsCarousel(selectedItem: $viewModel.selectedItem, items: viewModel.soldListings)
+            SoldLocationsCarousel(selectedItem: $viewModel.selectedItem, items: viewModel.soldListings) { selectedItem in
+                zoomToSelectedItem()
+            }
         }
         .onAppear {
             viewModel.fetchSoldListings()
         }
         .navigationTitle("Map of Previously Sold")
     }
+    
+    private func zoomToSelectedItem() {
+        guard let selectedItem = viewModel.selectedItem else { return }
+        
+        let selectedRegion = MKCoordinateRegion(center: selectedItem.coordinate, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
+        
+        withAnimation {
+            region = selectedRegion
+        }
+    }
 }
 
 struct SoldCustomListingAnno: View {
     let item: SoldListingsAnno
+    let isSelected: Bool
     let onTap: () -> Void
     
     var body: some View {
         Image(systemName: "mappin.circle.fill")
-            .foregroundColor(.blue)
+            .foregroundColor(isSelected ? .red : .blue)
+            .scaleEffect(isSelected ? 1.5 : 1.0)
             .onTapGesture {
                 onTap()
             }
