@@ -71,15 +71,15 @@ class SoldListingsViewModel: ObservableObject {
                 let fetchedData = try decoder.decode(Listing.self, from: data)
                 let annotations = fetchedData.value?.compactMap { anno -> SoldListingsAnno? in
                     let title = anno.UnparsedAddress
-//                    let listingContractDate = anno.ListingContractDate // Treat ListingContractDate as String
-
+                    let address = anno.UnparsedAddress // Extract the address value
+                    let listPrice = anno.ListPrice // Extract the list price value
                     let lat = anno.Latitude
                     let lon = anno.Longitude
                     let subTitle = anno.ListPrice
                     let imageURL = URL(string: anno.Media?.first?.MediaURL ?? "")
                     let coordinate = CLLocationCoordinate2D(latitude: lat ?? 0, longitude: lon ?? 0)
                     
-                    return SoldListingsAnno(title: title ?? "", coordinate: coordinate, subtitle: subTitle ?? 0, imageURL: imageURL)
+                    return SoldListingsAnno(title: title ?? "", coordinate: coordinate, subtitle: subTitle ?? 0, imageURL: imageURL, address: address ?? "", listPrice: listPrice ?? 0)
                 }
                 
                 DispatchQueue.main.async {
@@ -117,14 +117,20 @@ struct SoldLocationCell: View {
             } placeholder: {
                 ProgressView()
             }
-            
+            Spacer()
+
             VStack(alignment: .leading, spacing: 4) {
                 Text(item.title)
                     .font(.system(size: 16, weight: .bold))
+                    
                     .lineLimit(1)
+                    .foregroundColor(.black)
+
                 
                 Text(item.formattedPrice)
                     .font(.system(size: 14))
+                    .foregroundColor(.black)
+
             }
             .padding(.all, 16)
         }
@@ -139,15 +145,18 @@ struct SoldLocationsCarousel: View {
     let items: [SoldListingsAnno]
     let onItemSelected: (SoldListingsAnno) -> Void
     
+    private let itemWidth: CGFloat = 300 // Adjust this value based on your desired item width
+    private let itemSpacing: CGFloat = 12 // Adjust this value based on your desired spacing between items
+    
     var body: some View {
         GeometryReader { geometry in
             ScrollViewReader { proxy in
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 12) {
+                    HStack(spacing: itemSpacing) {
                         ForEach(items, id: \.self) { item in
                             SoldLocationCell(item: item)
                                 .id(item.id)
-                                .frame(width: geometry.size.width - 64)
+                                .frame(width: itemWidth)
                                 .onTapGesture {
                                     selectedItem = item
                                     onItemSelected(item)
@@ -157,7 +166,7 @@ struct SoldLocationsCarousel: View {
                                 }
                         }
                     }
-                    .padding(.horizontal, 32)
+                    .padding(.horizontal, (geometry.size.width - itemWidth) / 2)
                 }
                 .onChange(of: selectedItem) { newValue in
                     if let selectedItem = newValue {
@@ -166,6 +175,20 @@ struct SoldLocationsCarousel: View {
                         }
                     }
                 }
+                .gesture(
+                    DragGesture()
+                        .onEnded { value in
+                            let offset = value.translation.width
+                            let index = Int(round(offset / (itemWidth + itemSpacing)))
+                            let newIndex = max(0, min(items.count - 1, index))
+                            let snapItem = items[newIndex]
+                            selectedItem = snapItem
+                            onItemSelected(snapItem)
+                            withAnimation {
+                                proxy.scrollTo(snapItem.id, anchor: .center)
+                            }
+                        }
+                )
             }
         }
         .frame(height: 150)
@@ -252,20 +275,24 @@ struct SoldListingsAnno: Identifiable, Equatable, Hashable {
     let coordinate: CLLocationCoordinate2D
     let subtitle: Int
     let imageURL: URL?
+    let address: String
+    let listPrice: Int
     
     var formattedPrice: String {
         let formatter = NumberFormatter()
         formatter.numberStyle = .currency
         formatter.maximumFractionDigits = 0
         formatter.locale = Locale.current
-        return formatter.string(from: NSNumber(value: subtitle)) ?? ""
+        return formatter.string(from: NSNumber(value: listPrice)) ?? ""
     }
     
-    init(title: String, coordinate: CLLocationCoordinate2D, subtitle: Int, imageURL: URL?) {
+    init(title: String, coordinate: CLLocationCoordinate2D, subtitle: Int, imageURL: URL?, address: String, listPrice: Int) {
         self.title = title.localizedCapitalized
         self.coordinate = coordinate
         self.subtitle = subtitle
         self.imageURL = imageURL
+        self.address = address
+        self.listPrice = listPrice
     }
     
     static func == (lhs: SoldListingsAnno, rhs: SoldListingsAnno) -> Bool {
