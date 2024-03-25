@@ -142,58 +142,47 @@ struct SoldLocationCell: View {
 
 struct SoldLocationsCarousel: View {
     @Binding var selectedItem: SoldListingsAnno?
-    let items: [SoldListingsAnno]
+    var items: [SoldListingsAnno]
     let onItemSelected: (SoldListingsAnno) -> Void
-    
-    private let itemWidth: CGFloat = 300 // Adjust this value based on your desired item width
-    private let itemSpacing: CGFloat = 12 // Adjust this value based on your desired spacing between items
-    
+
+    private let itemWidth: CGFloat = 300
+    private let itemSpacing: CGFloat = 12
+
     var body: some View {
-        GeometryReader { geometry in
-            ScrollViewReader { proxy in
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: itemSpacing) {
-                        ForEach(items, id: \.self) { item in
-                            SoldLocationCell(item: item)
-                                .id(item.id)
-                                .frame(width: itemWidth)
-                                .onTapGesture {
-                                    selectedItem = item
-                                    onItemSelected(item)
-                                    withAnimation {
-                                        proxy.scrollTo(item.id, anchor: .center)
-                                    }
+        ScrollViewReader { proxy in
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: itemSpacing) {
+                    ForEach(items) { item in
+                        SoldLocationCell(item: item)
+                            .frame(width: itemWidth)
+                            .id(item.id)
+                            .onTapGesture {
+                                selectedItem = item
+                                onItemSelected(item)
+                                withAnimation(.easeInOut) {
+                                    proxy.scrollTo(item.id, anchor: .center)
                                 }
-                        }
-                    }
-                    .padding(.horizontal, (geometry.size.width - itemWidth) / 2)
-                }
-                .onChange(of: selectedItem) { newValue in
-                    if let selectedItem = newValue {
-                        withAnimation {
-                            proxy.scrollTo(selectedItem.id, anchor: .center)
-                        }
-                    }
-                }
-                .gesture(
-                    DragGesture()
-                        .onEnded { value in
-                            let offset = value.translation.width
-                            let index = Int(round(offset / (itemWidth + itemSpacing)))
-                            let newIndex = max(0, min(items.count - 1, index))
-                            let snapItem = items[newIndex]
-                            selectedItem = snapItem
-                            onItemSelected(snapItem)
-                            withAnimation {
-                                proxy.scrollTo(snapItem.id, anchor: .center)
                             }
-                        }
-                )
+                    }
+                }
+                .padding(.horizontal, itemSpacing)
+            }
+            .onChange(of: selectedItem) { _ in
+                if let selectedItem = selectedItem {
+                    withAnimation(.easeInOut) {
+                        proxy.scrollTo(selectedItem.id, anchor: .center)
+                    }
+                }
             }
         }
         .frame(height: 150)
+        // Removed the onAppear that attempted to use `proxy` outside its closure
     }
 }
+
+
+            
+
 
 //class SoldListingsViewModel: ObservableObject {
 //    @Published var soldListings: [SoldListingsAnno] = []
@@ -222,34 +211,49 @@ struct SoldLocationsCarousel: View {
 struct MapOfSoldListings: View {
     @StateObject private var viewModel = SoldListingsViewModel()
     @State private var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 34.144404, longitude: -118.872124), span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1))
+//    @State private var showingDetailSheet = false // State for showing the detail sheet/modal
     
     var body: some View {
-        ZStack(alignment: .bottom) {
-            Map(coordinateRegion: $region, annotationItems: viewModel.soldListings) { item in
-                MapAnnotation(coordinate: item.coordinate) {
-                    SoldCustomListingAnno(item: item, isSelected: item.id == viewModel.selectedItem?.id) {
-                        viewModel.selectedItem = item
-                        zoomToSelectedItem()
+        NavigationView {
+            ZStack(alignment: .bottom) {
+                // Inside MapOfSoldListings
+                Map(coordinateRegion: $region, annotationItems: viewModel.soldListings) { item in
+                    MapAnnotation(coordinate: item.coordinate) {
+                        Image(systemName: viewModel.selectedItem?.id == item.id ? "mappin.circle.fill" : "mappin")
+                            .foregroundColor(viewModel.selectedItem?.id == item.id ? .red : .blue)
+                            .onTapGesture {
+                                viewModel.selectedItem = item
+                                zoomToSelectedItem() // Ensure this correctly zooms into the selected item's location.
+                            }
                     }
                 }
+
+
+
+
+                SoldLocationsCarousel(selectedItem: $viewModel.selectedItem, items: viewModel.soldListings) { selectedItem in
+                    // Here, the selectedItem state is updated, which can trigger UI updates or actions.
+//                    showingDetailSheet = true
+                }
+//                .sheet(isPresented: $showingDetailSheet) {
+//                    // Present the detail view for the selected item.
+//                    if let selectedItem = viewModel.selectedItem {
+//                        ListingDetailView(listing: selectedItem)
+//                    }
+//                }
             }
-            
-            SoldLocationsCarousel(selectedItem: $viewModel.selectedItem, items: viewModel.soldListings) { selectedItem in
-                zoomToSelectedItem()
+            .onAppear {
+                viewModel.fetchSoldListings()
             }
+            .navigationTitle("Map of Previously Sold")
         }
-        .onAppear {
-            viewModel.fetchSoldListings()
-        }
-        .navigationTitle("Map of Previously Sold")
     }
-    
     private func zoomToSelectedItem() {
         guard let selectedItem = viewModel.selectedItem else { return }
         
-        let selectedRegion = MKCoordinateRegion(center: selectedItem.coordinate, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
+        let selectedRegion = MKCoordinateRegion(center: selectedItem.coordinate, latitudinalMeters: 500, longitudinalMeters: 500) // Adjust the zoom level as needed
         
-        withAnimation {
+        withAnimation(.easeOut(duration: 0.5)) {
             region = selectedRegion
         }
     }
