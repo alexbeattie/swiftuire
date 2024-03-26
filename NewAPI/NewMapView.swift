@@ -147,6 +147,8 @@ struct SoldLocationCell: View {
 
 struct SoldLocationsCarousel: View {
     @Binding var selectedItem: SoldListingsAnno?
+    @Binding var scrollToSelectedItem: Bool // Add this line
+
     var items: [SoldListingsAnno]
     let onItemSelected: (SoldListingsAnno) -> Void
 //    let onZoomToItem: (SoldListingsAnno, Bool) -> Void // Updated closure parameter
@@ -183,6 +185,13 @@ struct SoldLocationsCarousel: View {
 //                    onZoomToItem(selectedItem, true) // Pass true for animated zoom
                 }
             }
+            .onChange(of: scrollToSelectedItem) { shouldScroll in // Add this block
+                           if shouldScroll {
+                               withAnimation {
+                                   proxy.scrollTo(selectedItem?.id, anchor: .center)
+                               }
+                           }
+                       }
         }
         .frame(height: 150)
         // Removed the onAppear that attempted to use `proxy` outside its closure
@@ -193,34 +202,13 @@ struct SoldLocationsCarousel: View {
 
 
 
-//class SoldListingsViewModel: ObservableObject {
-//    @Published var soldListings: [SoldListingsAnno] = []
-//    @Published var selectedItem: SoldListingsAnno?
-//
-//    func fetchSoldListings() {
-//        SoldListings.fetchListing { [weak self] listing in
-//            guard let self = self else { return }
-//            let annotations = listing.D.Results.compactMap { anno -> SoldListingsAnno? in
-//                let title = anno.StandardFields.UnparsedFirstLineAddress
-//                let lat = anno.StandardFields.Latitude
-//                let lon = anno.StandardFields.Longitude
-//                let subTitle = anno.StandardFields.ListPrice
-//                let imageURL = URL(string: anno.StandardFields.Photos?[0].Uri640 ?? "")
-//                let coordinate = CLLocationCoordinate2D(latitude: lat ?? 0, longitude: lon ?? 0)
-//
-//                return SoldListingsAnno(title: title ?? "", coordinate: coordinate, subTitle: subTitle ?? 0, imageURL: imageURL)
-//            }
-//            DispatchQueue.main.async {
-//                self.soldListings = annotations
-//            }
-//        }
-//    }
-//}
 
 struct MapOfSoldListings: View {
     @StateObject private var viewModel = SoldListingsViewModel()
     @State private var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 34.144404, longitude: -118.872124), span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1))
     @State private var isAnimating = false
+    @State private var scrollToSelectedItem = false
+
     
     var body: some View {
         NavigationView {
@@ -233,6 +221,8 @@ struct MapOfSoldListings: View {
                                 viewModel.selectedItem = item
                                 withAnimation {
                                     isAnimating = true
+                                    scrollToSelectedItem = true // Add this line
+
                                 }
                             }
                     }
@@ -240,6 +230,8 @@ struct MapOfSoldListings: View {
                 
                 SoldLocationsCarousel(
                     selectedItem: $viewModel.selectedItem,
+                    scrollToSelectedItem: $scrollToSelectedItem, // Pass the binding
+
                     items: viewModel.soldListings,
                     onItemSelected: { selectedItem in
                         viewModel.selectedItem = selectedItem
@@ -259,6 +251,8 @@ struct MapOfSoldListings: View {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                         withAnimation {
                             isAnimating = false
+                            scrollToSelectedItem = false // Add this line
+
                         }
                     }
                 }
