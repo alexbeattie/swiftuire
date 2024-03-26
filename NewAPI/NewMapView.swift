@@ -64,9 +64,9 @@ class SoldListingsViewModel: ObservableObject {
             
             do {
                 let decoder = JSONDecoder()
-//                let dateFormatter = DateFormatter()
-//                dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ" // Adjust the date format if needed
-//                decoder.dateDecodingStrategy = .formatted(dateFormatter)
+                //                let dateFormatter = DateFormatter()
+                //                dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ" // Adjust the date format if needed
+                //                decoder.dateDecodingStrategy = .formatted(dateFormatter)
                 
                 let fetchedData = try decoder.decode(Listing.self, from: data)
                 let annotations = fetchedData.value?.compactMap { anno -> SoldListingsAnno? in
@@ -96,15 +96,17 @@ class SoldListingsViewModel: ObservableObject {
         }.resume()
     }
     
-//    func fetchNextPage() {
-//        guard !isLoading else { return }
-//        
-//        currentPage += 1
-//        fetchSoldListings()
-//    }
+    //    func fetchNextPage() {
+    //        guard !isLoading else { return }
+    //
+    //        currentPage += 1
+    //        fetchSoldListings()
+    //    }
 }
 struct SoldLocationCell: View {
     let item: SoldListingsAnno
+    let isSelected: Bool
+    let onTap: () -> Void
     
     var body: some View {
         HStack {
@@ -118,25 +120,28 @@ struct SoldLocationCell: View {
                 ProgressView()
             }
             Spacer()
-
+            
             VStack(alignment: .leading, spacing: 4) {
                 Text(item.title)
                     .font(.system(size: 16, weight: .bold))
-                    
+                
                     .lineLimit(1)
                     .foregroundColor(.black)
-
+                
                 
                 Text(item.formattedPrice)
                     .font(.system(size: 14))
                     .foregroundColor(.black)
-
+                
             }
             .padding(.all, 16)
         }
         .background(Color.white)
         .cornerRadius(5)
         .shadow(color: .black.opacity(0.1), radius: 5, x: 0, y: 0)
+        .onTapGesture {
+            onTap()
+        }
     }
 }
 
@@ -144,34 +149,38 @@ struct SoldLocationsCarousel: View {
     @Binding var selectedItem: SoldListingsAnno?
     var items: [SoldListingsAnno]
     let onItemSelected: (SoldListingsAnno) -> Void
-
+//    let onZoomToItem: (SoldListingsAnno, Bool) -> Void // Updated closure parameter
+    
     private let itemWidth: CGFloat = 300
     private let itemSpacing: CGFloat = 12
-
+    
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: itemSpacing) {
                     ForEach(items) { item in
-                        SoldLocationCell(item: item)
-                            .frame(width: itemWidth)
-                            .id(item.id)
-                            .onTapGesture {
+                        SoldLocationCell(
+                            item: item,
+                            isSelected: selectedItem?.id == item.id,
+                            onTap: {
                                 selectedItem = item
                                 onItemSelected(item)
+//                                onZoomToItem(item, true) // Pass true for animated zoom
                                 withAnimation(.easeInOut) {
                                     proxy.scrollTo(item.id, anchor: .center)
                                 }
                             }
+                        )
+                        .frame(width: itemWidth)
+                        .id(item.id)
                     }
                 }
                 .padding(.horizontal, itemSpacing)
             }
-            .onChange(of: selectedItem) { _ in
-                if let selectedItem = selectedItem {
-                    withAnimation(.easeInOut) {
-                        proxy.scrollTo(selectedItem.id, anchor: .center)
-                    }
+            .onChange(of: selectedItem) { newValue in
+                if let selectedItem = newValue {
+                    onItemSelected(selectedItem)
+//                    onZoomToItem(selectedItem, true) // Pass true for animated zoom
                 }
             }
         }
@@ -181,13 +190,13 @@ struct SoldLocationsCarousel: View {
 }
 
 
-            
+
 
 
 //class SoldListingsViewModel: ObservableObject {
 //    @Published var soldListings: [SoldListingsAnno] = []
 //    @Published var selectedItem: SoldListingsAnno?
-//    
+//
 //    func fetchSoldListings() {
 //        SoldListings.fetchListing { [weak self] listing in
 //            guard let self = self else { return }
@@ -198,7 +207,7 @@ struct SoldLocationsCarousel: View {
 //                let subTitle = anno.StandardFields.ListPrice
 //                let imageURL = URL(string: anno.StandardFields.Photos?[0].Uri640 ?? "")
 //                let coordinate = CLLocationCoordinate2D(latitude: lat ?? 0, longitude: lon ?? 0)
-//                
+//
 //                return SoldListingsAnno(title: title ?? "", coordinate: coordinate, subTitle: subTitle ?? 0, imageURL: imageURL)
 //            }
 //            DispatchQueue.main.async {
@@ -211,50 +220,58 @@ struct SoldLocationsCarousel: View {
 struct MapOfSoldListings: View {
     @StateObject private var viewModel = SoldListingsViewModel()
     @State private var region = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 34.144404, longitude: -118.872124), span: MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1))
-//    @State private var showingDetailSheet = false // State for showing the detail sheet/modal
+    @State private var isAnimating = false
     
     var body: some View {
         NavigationView {
             ZStack(alignment: .bottom) {
-                // Inside MapOfSoldListings
                 Map(coordinateRegion: $region, annotationItems: viewModel.soldListings) { item in
                     MapAnnotation(coordinate: item.coordinate) {
                         Image(systemName: viewModel.selectedItem?.id == item.id ? "mappin.circle.fill" : "mappin")
                             .foregroundColor(viewModel.selectedItem?.id == item.id ? .red : .blue)
                             .onTapGesture {
                                 viewModel.selectedItem = item
-                                zoomToSelectedItem() // Ensure this correctly zooms into the selected item's location.
+                                withAnimation {
+                                    isAnimating = true
+                                }
                             }
                     }
                 }
-
-
-
-
-                SoldLocationsCarousel(selectedItem: $viewModel.selectedItem, items: viewModel.soldListings) { selectedItem in
-                    // Here, the selectedItem state is updated, which can trigger UI updates or actions.
-//                    showingDetailSheet = true
-                }
-//                .sheet(isPresented: $showingDetailSheet) {
-//                    // Present the detail view for the selected item.
-//                    if let selectedItem = viewModel.selectedItem {
-//                        ListingDetailView(listing: selectedItem)
-//                    }
-//                }
+                
+                SoldLocationsCarousel(
+                    selectedItem: $viewModel.selectedItem,
+                    items: viewModel.soldListings,
+                    onItemSelected: { selectedItem in
+                        viewModel.selectedItem = selectedItem
+                        withAnimation {
+                            isAnimating = true
+                        }
+                    }
+                )
             }
             .onAppear {
                 viewModel.fetchSoldListings()
             }
             .navigationTitle("Map of Previously Sold")
+            .onChange(of: isAnimating) { newValue in
+                if newValue {
+                    zoomToSelectedItem()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        withAnimation {
+                            isAnimating = false
+                        }
+                    }
+                }
+            }
         }
     }
+    
     private func zoomToSelectedItem() {
         guard let selectedItem = viewModel.selectedItem else { return }
         
-        let selectedRegion = MKCoordinateRegion(center: selectedItem.coordinate, latitudinalMeters: 500, longitudinalMeters: 500) // Adjust the zoom level as needed
-        
-        withAnimation(.easeOut(duration: 0.5)) {
-            region = selectedRegion
+        let zoomRegion = MKCoordinateRegion(center: selectedItem.coordinate, span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01))
+        withAnimation(.easeInOut(duration: 0.5)) {
+            region = zoomRegion
         }
     }
 }
