@@ -14,7 +14,7 @@ class ListingPublisherViewModel: ObservableObject {
     private let token = TOKEN
     private var currentPage = 0
     let itemsPerPage = 5
-    var teamnickandkaren = "20180828211801958268000000"
+    var teamnickandkaren = "20160917171150811658000000"
     var vanparys = "207092085"
     var ok = "20160917164830438874000000"
     var compass = "20180423214801878673000000"
@@ -27,8 +27,11 @@ class ListingPublisherViewModel: ObservableObject {
     var kirkman = "20200702220937059314000000"
     var kramer = "20200702220640427118000000"
     var barbara = "20160726143802546977000000"
-    
-    
+    var fenton = "20221006165222145483000000"
+    var sandvig = "20160917171026492360000000"
+    var vp = "20220622184809040862000000"
+    var pm = "20160917171201610393000000"
+
     func fetchProducts() async {
         isLoading = true
 
@@ -37,7 +40,7 @@ class ListingPublisherViewModel: ObservableObject {
 //            URLQueryItem(name: "$filter", value: "(MlsStatus ne 'Active') and ListOfficeKey eq '\(officeKey)' and StandardStatus ne 'Closed' and StandardStatus ne 'Expired' and StandardStatus ne 'Canceled'"),
             
             //van parys
-            URLQueryItem(name: "$filter", value: "ListAgentKey eq '\(listAgentKey)' and StandardStatus eq 'Closed' and StandardStatus ne 'Expired' and StandardStatus ne 'Canceled'"),
+            URLQueryItem(name: "$filter", value: "ListAgentKey eq '\(pm)' and StandardStatus eq 'Closed' and StandardStatus ne 'Expired' and StandardStatus ne 'Canceled'"),
 
 //            URLQueryItem(name: "$filter", value: "MlsStatus eq 'Pending'"),
             //all past 'Sold' Sherwood listings query

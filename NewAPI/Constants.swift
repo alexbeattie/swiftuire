@@ -9,3 +9,4 @@ import Foundation
 
 
 let TOKEN = "783gnjjn82x92n9lbvpr1r0c1"
+let AGENTKEY = ""

@@ -16,14 +16,19 @@ class SoldListingsViewModel: ObservableObject {
     private let baseURL = "https://replication.sparkapi.com/Reso/OData/Property"
     private let token = TOKEN
     private var currentPage = 0
-    let itemsPerPage = 25
+    let itemsPerPage = 10
     var listAgentKey = "20160917171119703445000000"
-    
+    var otherAgentKey = "20160917171113923841000000"
+    var fenton = "20220924045922314237000000"
+    var teamnickandkaren = "20160917171150811658000000"
+    var vp = "20220622184809040862000000"
+    var ha = "20220414171808273913000000"
+    var pm = "20160917171201610393000000"
     func fetchSoldListings() {
         isLoading = true
         
         let queryItems = [
-            URLQueryItem(name: "$filter", value: "ListAgentKey eq '\(listAgentKey)' and StandardStatus eq 'Closed' and StandardStatus ne 'Expired' and StandardStatus ne 'Canceled'"),
+            URLQueryItem(name: "$filter", value: "ListAgentKey eq '\(pm)' and StandardStatus eq 'Closed' and StandardStatus ne 'Expired' and StandardStatus ne 'Canceled'"),
             URLQueryItem(name: "$orderby", value: "ListPrice desc"),
             URLQueryItem(name: "$top", value: "\(itemsPerPage)"),
             URLQueryItem(name: "$skip", value: "\(currentPage * itemsPerPage)"),
