@@ -20,7 +20,7 @@ struct MainTabView: View {
                 }
                 .tag(0)
             
-            NewMapView(listings: vm.results)
+            NewMapView(listings: Array(vm.results))
                 .tabItem {
                     Image(systemName: "map")
                     Text("Map")

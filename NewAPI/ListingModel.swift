@@ -54,10 +54,15 @@ struct Listing: Codable {
        }
 }
 
-struct Value: Codable, Equatable, Identifiable {
-    static func == (lhs: Value, rhs: Value) -> Bool {
-        return lhs.id == rhs.id
-    }
+struct Value: Codable, Equatable, Identifiable, Hashable {
+    func hash(into hasher: inout Hasher) {
+           hasher.combine(ListingKey)
+       }
+       
+       // Keep the existing == operator function implementation
+       static func == (lhs: Value, rhs: Value) -> Bool {
+           return lhs.id == rhs.id
+       }
     let AssociationAmenities: [String]?
     let CommunityFeatures: [String]?
     let Disclosures: [String]?

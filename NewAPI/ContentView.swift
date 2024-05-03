@@ -11,87 +11,91 @@ struct ContentView: View {
 
         VStack(alignment: .leading, spacing: 8.0) {
             NavigationView {
-                ScrollView {
-                    VStack {
-                        
-                        ForEach(vm.results, id: \.ListingKey) { listing in
-                            NavigationLink {
-                                NavigationLazyView(PopDetailsView(value: listing))
-                            } label: {
-                                VStack(alignment: .leading) {
-                                    HStack {
+                GeometryReader { geometry in
+                    
+                    ScrollView {
+                        VStack {
                             
-                                        AsyncImage(url: URL(string: listing.Media?.first?.MediaURL ?? "")) { phase in
-                                            switch phase {
-                                            case .success(let image):
-                                                image
-                                                    .resizable()
-                                                    .aspectRatio(contentMode: .fill)
-                                                    .clipped()
-                                                    .ignoresSafeArea()
-                                                    .overlay(alignment: .bottom) {
-                                                        ImageOverlayView(listing: listing)
-                                                    }
-                                            case .failure(_):
-                                                ProgressView()
-                                                    .frame(width: 50, height: 50)
-                                                    .progressViewStyle(CircularProgressViewStyle())
-                                                    .onAppear {
-                                                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                                                            // Retry loading the image after a 1-second delay
-                                                            // You can adjust the delay as needed
-                                                            vm.objectWillChange.send()
+                            ForEach(Array(vm.results).sorted(by: { $0.ListPrice ?? 0 > $1.ListPrice ?? 0 }), id: \.ListingKey) { listing in
+                                NavigationLink {
+                                    NavigationLazyView(PopDetailsView(value: listing))
+                                } label: {
+                                    VStack(alignment: .leading) {
+                                        HStack {
+                                            
+                                            AsyncImage(url: URL(string: listing.Media?.first?.MediaURL ?? "")) { phase in
+                                                switch phase {
+                                                case .success(let image):
+                                                    image
+                                                        .resizable()
+                                                        .aspectRatio(contentMode: .fill)
+                                                        .clipped()
+                                                        .ignoresSafeArea()
+                                                        .overlay(alignment: .bottom) {
+                                                            ImageOverlayView(listing: listing)
                                                         }
-                                                    }
-                                                
-                                            case .empty:
-                                                ZStack {
-                                                    Color.black
-                                                    
+                                                case .failure(_):
                                                     ProgressView()
                                                         .frame(width: 50, height: 50)
                                                         .progressViewStyle(CircularProgressViewStyle())
+                                                        .onAppear {
+                                                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                                                                // Retry loading the image after a 1-second delay
+                                                                // You can adjust the delay as needed
+                                                                vm.objectWillChange.send()
+                                                            }
+                                                        }
+                                                    
+                                                case .empty:
+                                                    ZStack {
+                                                        Color.black
+                                                        
+                                                        ProgressView()
+                                                            .frame(width: 50, height: 50)
+                                                            .progressViewStyle(CircularProgressViewStyle())
+                                                    }
+                                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                                @unknown default:
+                                                    EmptyView()
                                                 }
-                                                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                            @unknown default:
-                                                EmptyView()
                                             }
                                         }
-                                    }
-                                    
-                                    HStack(alignment: .center) {
-                                        ListingDetailsView(listing: listing)
+                                        
+                                        HStack(alignment: .center) {
+                                            ListingDetailsView(listing: listing)
+                                        }
                                     }
                                 }
+                                
+                                .padding(.bottom)
                             }
                             
-                            .padding(.bottom)
-                        }
-                        
-                        if vm.isLoading {
-                            ProgressView()
-                        } else if vm.hasMoreData {
-                            
-                            HStack {
-                                Button(action: {
-                                    Task {
-                                        await vm.fetchNextPage(mlsServiceKey: vm.mlsClaw)
+                            if vm.isLoading {
+                                ProgressView()
+                            } else if vm.hasMoreData {
+                                
+                                HStack {
+                                    Button(action: {
+                                        Task {
+                                            await vm.fetchNextPage(mlsServiceKey: vm.mlsClaw)
+                                        }
+                                        
+                                    }) {
+                                        Label("Load More", systemImage: "arrow.forward")
+                                            .font(.system(size: 14, weight: .regular))
+                                            .foregroundColor(.gray)
+                                        
+                                        //                                    Text("Load More")
+                                        //                                        .padding(EdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10))
                                     }
-                                    
-                                }) {
-                                    Label("Load More", systemImage: "arrow.forward")
-                                        .font(.system(size: 14, weight: .regular))
-                                        .foregroundColor(.gray)
-                                    
-                                    //                                    Text("Load More")
-                                    //                                        .padding(EdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10))
                                 }
+                                .padding(EdgeInsets(top: 10, leading: 10, bottom: 100, trailing: 10))
                             }
-                            .padding(EdgeInsets(top: 10, leading: 10, bottom: 100, trailing: 10))
                         }
                     }
+                    .edgesIgnoringSafeArea(.all)
+                                    .ignoresSafeArea()
                 }
-                .ignoresSafeArea()
                 .preferredColorScheme(.dark)
             }
         }

@@ -2,7 +2,9 @@ import Foundation
 
 @MainActor
 class ListingPublisherViewModel: ObservableObject {
-    @Published var results = [Value]()
+//    @Published var results = [Value]()
+    @Published var results = Set<Value>()
+
     @Published var listings = [Listing]()
     
     @Published var hasMoreData = true
@@ -17,7 +19,7 @@ class ListingPublisherViewModel: ObservableObject {
     private let baseURL = "https://replication.sparkapi.com/Reso/OData/Property"
     private let token = TOKEN
     private var currentPage = 0
-    let itemsPerPage = 40
+    let itemsPerPage = 5
     var teamnickandkaren = "20160917171150811658000000"
     var vanparys = "207092085"
     var ok = "20160917164830438874000000"
@@ -57,17 +59,18 @@ class ListingPublisherViewModel: ObservableObject {
 
 //            URLQueryItem(name: "$filter", value: "MlsId eq '\(mlsClaw)' and StandardStatus eq 'Closed' and StandardStatus ne 'Expired' and StandardStatus ne 'Canceled'"),
             
-            URLQueryItem(name: "$filter", value: "MlsId eq '\(mlsServiceKey)' and StandardStatus eq 'Active' "),
+//            URLQueryItem(name: "$filter", value: "MlsId eq '\(mlsServiceKey)' and StandardStatus eq 'Active' "),
 
 //            URLQueryItem(name: "$filter", value: "MlsStatus eq 'Pending'"),
             //all past 'Sold' Sherwood listings query
 //            URLQueryItem(name: "$filter", value: "ListOfficeKey eq '\(officeKey)' and StandardStatus eq 'Closed' and StandardStatus ne 'Expired' and StandardStatus ne 'Canceled'"),
+            URLQueryItem(name: "$filter", value: "(CoListAgentKey eq '\(teamnickandkaren)' or ListAgentKey eq '\(teamnickandkaren)') and StandardStatus ne 'Closed' and StandardStatus ne 'Expired' and StandardStatus ne 'Canceled'"),
+
             URLQueryItem(name: "$orderby", value: "ListPrice desc"),
-//            URLQueryItem(name: "$filter", value: "ListAgentKey eq '\(crystal)' and StandardStatus ne 'Closed' and StandardStatus ne 'Expired' and StandardStatus ne 'Canceled'"),
-            URLQueryItem(name: "$top", value: "\(itemsPerPage)"),
+//            URLQueryItem(name: "$top", value: "\(itemsPerPage)"),
             URLQueryItem(name: "$skip", value: "\(currentPage * itemsPerPage)"),
             URLQueryItem(name: "$expand", value: "Media"),
-            URLQueryItem(name: "$select", value: "ListPrice,MlsStatus,BuildingAreaTotal,ArchitecturalStyle,BedroomsTotal,BathroomsTotalInteger,BuyerAgentEmail,CloseDate,ClosePrice,DaysOnMarket,DocumentsCount,GarageSpaces,Inclusions,Latitude,Longitude,ListAgentKey,ListPrice,ListingContractDate,ListingId,ListingKey,LivingArea,LotSizeAcres,OffMarketDate,OnMarketDate,OriginalListPrice,PendingTimestamp,Model,AssociationAmenities,AssociationName,ListOfficePhone,AssociationFee,BathroomsTotalDecimal,BuilderName,CoListAgentEmail,ListAgentEmail,CommunityFeatures,ConstructionMaterials,Disclosures,DocumentsAvailable,DocumentsChangeTimestamp,InteriorFeatures,Levels,LotFeatures,LotSizeAcres,LotSizeArea,MajorChangeTimestamp,Model,ModificationTimestamp,OnMarketDate,OtherStructures,ParkingFeatures,PhotosCount,SecurityFeatures,SourceSystemName,UnparsedAddress,View,YearBuilt,ListAgentFirstName,ListAgentLastName,CoListAgentFirstName,CoListAgentLastName,ListAgentStateLicense,Appliances,StreetNumberNumeric,BathroomsHalf,Listing_sp_Location_sp_and_sp_Property_sp_Info_co_List_sp_PriceSqFt,Commission_sp_Info_co_Buyer_sp_Agency_sp_Comp,Showing_sp_Information_co_Showing_sp_Contact_sp_Name,Parking_sp_SpacesInformation_co_Total_sp_Garage_sp_Spaces,PublicRemarks,StreetName,StreetSuffix,StreetNumber,City,StateOrProvince,ListAgentFullName,ConstructionMaterials,Cooling,Heating,Electric,Flooring,InteriorFeatures,View,WindowFeatures,Appliances")
+//            URLQueryItem(name: "$select", value: "ListPrice,MlsStatus,BuildingAreaTotal,ArchitecturalStyle,BedroomsTotal,BathroomsTotalInteger,BuyerAgentEmail,CloseDate,ClosePrice,DaysOnMarket,DocumentsCount,GarageSpaces,Inclusions,Latitude,Longitude,ListAgentKey,ListPrice,ListingContractDate,ListingId,ListingKey,LivingArea,LotSizeAcres,OffMarketDate,OnMarketDate,OriginalListPrice,PendingTimestamp,Model,AssociationAmenities,AssociationName,ListOfficePhone,AssociationFee,BathroomsTotalDecimal,BuilderName,CoListAgentEmail,ListAgentEmail,CommunityFeatures,ConstructionMaterials,Disclosures,DocumentsAvailable,DocumentsChangeTimestamp,InteriorFeatures,Levels,LotFeatures,LotSizeAcres,LotSizeArea,MajorChangeTimestamp,Model,ModificationTimestamp,OnMarketDate,OtherStructures,ParkingFeatures,PhotosCount,SecurityFeatures,SourceSystemName,UnparsedAddress,View,YearBuilt,ListAgentFirstName,ListAgentLastName,CoListAgentFirstName,CoListAgentLastName,ListAgentStateLicense,Appliances,StreetNumberNumeric,BathroomsHalf,Listing_sp_Location_sp_and_sp_Property_sp_Info_co_List_sp_PriceSqFt,Commission_sp_Info_co_Buyer_sp_Agency_sp_Comp,Showing_sp_Information_co_Showing_sp_Contact_sp_Name,Parking_sp_SpacesInformation_co_Total_sp_Garage_sp_Spaces,PublicRemarks,StreetName,StreetSuffix,StreetNumber,City,StateOrProvince,ListAgentFullName,ConstructionMaterials,Cooling,Heating,Electric,Flooring,InteriorFeatures,View,WindowFeatures,Appliances")
         ]
         
         var urlComponents = URLComponents(string: baseURL)
@@ -94,6 +97,8 @@ class ListingPublisherViewModel: ObservableObject {
     }
     
     func fetchAllMlsServices() async {
+        results.removeAll() // Clear the results array before fetching
+
             for mlsServiceKey in mlsServices {
                 await fetchProducts(mlsServiceKey: mlsServiceKey)
             }
@@ -104,11 +109,18 @@ class ListingPublisherViewModel: ObservableObject {
         let formatter = DateFormatter()
         formatter.dateFormat = "y-MM-dd"
         decoder.dateDecodingStrategy = .formatted(formatter)
-        
         let fetchedData = try decoder.decode(Listing.self, from: data)
+
+        let sortedValues = fetchedData.value?.sorted(by: { $0.ListPrice ?? 0 > $1.ListPrice ?? 0 }) ?? []
+
+//        let fetchedData = try decoder.decode(Listing.self, from: data)
         await MainActor.run {
-            self.results.append(contentsOf: fetchedData.value ?? [])
+//            self.results.formUnion(fetchedData.value ?? [])
+            self.results.formUnion(sortedValues)
+
+//            self.results.append(contentsOf: fetchedData.value ?? [])
             self.listings = [fetchedData]
+            
             self.hasMoreData = fetchedData.odataNextLink != nil
 
             print(listings)
