@@ -7,13 +7,17 @@ class ListingPublisherViewModel: ObservableObject {
     
     @Published var hasMoreData = true
     @Published var isLoading = false
-
+    @Published var mlsServices:[String]
+    init() {
+        self.mlsServices = [mlsClaw, csmar]
+    }
+    
     
     
     private let baseURL = "https://replication.sparkapi.com/Reso/OData/Property"
     private let token = TOKEN
     private var currentPage = 0
-    let itemsPerPage = 5
+    let itemsPerPage = 40
     var teamnickandkaren = "20160917171150811658000000"
     var vanparys = "207092085"
     var ok = "20160917164830438874000000"
@@ -31,8 +35,17 @@ class ListingPublisherViewModel: ObservableObject {
     var sandvig = "20160917171026492360000000"
     var vp = "20220622184809040862000000"
     var pm = "20160917171201610393000000"
+    
+    var mlsClaw = "20200630203341057545000000"
+    var highDesert = "20200630204544040064000000"
+    var southlandRegional = "20200630203518576361000000"
+    var itech = "20200630203206752718000000"
+    var gpsmls = "20190211172710340762000000"
+    var crmls = "20200218121507636729000000"
+    var csmar = "20160622112753445171000000"
+    
 
-    func fetchProducts() async {
+    func fetchProducts(mlsServiceKey: String) async {
         isLoading = true
 
         let queryItems = [
@@ -40,7 +53,11 @@ class ListingPublisherViewModel: ObservableObject {
 //            URLQueryItem(name: "$filter", value: "(MlsStatus ne 'Active') and ListOfficeKey eq '\(officeKey)' and StandardStatus ne 'Closed' and StandardStatus ne 'Expired' and StandardStatus ne 'Canceled'"),
             
             //van parys
-            URLQueryItem(name: "$filter", value: "ListAgentKey eq '\(pm)' and StandardStatus eq 'Closed' and StandardStatus ne 'Expired' and StandardStatus ne 'Canceled'"),
+//            URLQueryItem(name: "$filter", value: "ListAgentKey eq '\(pm)' and StandardStatus eq 'Closed' and StandardStatus ne 'Expired' and StandardStatus ne 'Canceled'"),
+
+//            URLQueryItem(name: "$filter", value: "MlsId eq '\(mlsClaw)' and StandardStatus eq 'Closed' and StandardStatus ne 'Expired' and StandardStatus ne 'Canceled'"),
+            
+            URLQueryItem(name: "$filter", value: "MlsId eq '\(mlsServiceKey)' and StandardStatus eq 'Active' "),
 
 //            URLQueryItem(name: "$filter", value: "MlsStatus eq 'Pending'"),
             //all past 'Sold' Sherwood listings query
@@ -50,7 +67,7 @@ class ListingPublisherViewModel: ObservableObject {
             URLQueryItem(name: "$top", value: "\(itemsPerPage)"),
             URLQueryItem(name: "$skip", value: "\(currentPage * itemsPerPage)"),
             URLQueryItem(name: "$expand", value: "Media"),
-//            URLQueryItem(name: "$select", value: "ListPrice,MlsStatus,BuildingAreaTotal,ArchitecturalStyle,BedroomsTotal,BathroomsTotalInteger,BuyerAgentEmail,CloseDate,ClosePrice,DaysOnMarket,DocumentsCount,GarageSpaces,Inclusions,Latitude,Longitude,ListAgentKey,ListPrice,ListingContractDate,ListingId,ListingKey,LivingArea,LotSizeAcres,OffMarketDate,OnMarketDate,OriginalListPrice,PendingTimestamp,Model,AssociationAmenities,AssociationName,ListOfficePhone,AssociationFee,BathroomsTotalDecimal,BuilderName,CoListAgentEmail,ListAgentEmail,CommunityFeatures,ConstructionMaterials,Disclosures,DocumentsAvailable,DocumentsChangeTimestamp,InteriorFeatures,Levels,LotFeatures,LotSizeAcres,LotSizeArea,MajorChangeTimestamp,Model,ModificationTimestamp,OnMarketDate,OtherStructures,ParkingFeatures,PhotosCount,SecurityFeatures,SourceSystemName,UnparsedAddress,View,YearBuilt,ListAgentFirstName,ListAgentLastName,CoListAgentFirstName,CoListAgentLastName,ListAgentStateLicense,Appliances,StreetNumberNumeric,BathroomsHalf,Listing_sp_Location_sp_and_sp_Property_sp_Info_co_List_sp_PriceSqFt,Commission_sp_Info_co_Buyer_sp_Agency_sp_Comp,Showing_sp_Information_co_Showing_sp_Contact_sp_Name,Parking_sp_SpacesInformation_co_Total_sp_Garage_sp_Spaces,PublicRemarks,StreetName,StreetSuffix,StreetNumber,City,StateOrProvince,ListAgentFullName,ConstructionMaterials,Cooling,Heating,Electric,Flooring,InteriorFeatures,View,WindowFeatures,Appliances")
+            URLQueryItem(name: "$select", value: "ListPrice,MlsStatus,BuildingAreaTotal,ArchitecturalStyle,BedroomsTotal,BathroomsTotalInteger,BuyerAgentEmail,CloseDate,ClosePrice,DaysOnMarket,DocumentsCount,GarageSpaces,Inclusions,Latitude,Longitude,ListAgentKey,ListPrice,ListingContractDate,ListingId,ListingKey,LivingArea,LotSizeAcres,OffMarketDate,OnMarketDate,OriginalListPrice,PendingTimestamp,Model,AssociationAmenities,AssociationName,ListOfficePhone,AssociationFee,BathroomsTotalDecimal,BuilderName,CoListAgentEmail,ListAgentEmail,CommunityFeatures,ConstructionMaterials,Disclosures,DocumentsAvailable,DocumentsChangeTimestamp,InteriorFeatures,Levels,LotFeatures,LotSizeAcres,LotSizeArea,MajorChangeTimestamp,Model,ModificationTimestamp,OnMarketDate,OtherStructures,ParkingFeatures,PhotosCount,SecurityFeatures,SourceSystemName,UnparsedAddress,View,YearBuilt,ListAgentFirstName,ListAgentLastName,CoListAgentFirstName,CoListAgentLastName,ListAgentStateLicense,Appliances,StreetNumberNumeric,BathroomsHalf,Listing_sp_Location_sp_and_sp_Property_sp_Info_co_List_sp_PriceSqFt,Commission_sp_Info_co_Buyer_sp_Agency_sp_Comp,Showing_sp_Information_co_Showing_sp_Contact_sp_Name,Parking_sp_SpacesInformation_co_Total_sp_Garage_sp_Spaces,PublicRemarks,StreetName,StreetSuffix,StreetNumber,City,StateOrProvince,ListAgentFullName,ConstructionMaterials,Cooling,Heating,Electric,Flooring,InteriorFeatures,View,WindowFeatures,Appliances")
         ]
         
         var urlComponents = URLComponents(string: baseURL)
@@ -68,6 +85,7 @@ class ListingPublisherViewModel: ObservableObject {
         do {
             let (data, _) = try await URLSession.shared.data(for: request)
             try await parseData(data)
+            
         } catch {
             await handleError(error)
         }
@@ -75,6 +93,12 @@ class ListingPublisherViewModel: ObservableObject {
 
     }
     
+    func fetchAllMlsServices() async {
+            for mlsServiceKey in mlsServices {
+                await fetchProducts(mlsServiceKey: mlsServiceKey)
+            }
+        }
+
     private func parseData(_ data: Data) async throws {
         let decoder = JSONDecoder()
         let formatter = DateFormatter()
@@ -98,10 +122,10 @@ class ListingPublisherViewModel: ObservableObject {
             // Update UI to reflect the error state
         }
     }
-    func fetchNextPage() async {
+    func fetchNextPage(mlsServiceKey: String) async {
         guard !isLoading else { return }
-
+        
         currentPage += 1
-        await fetchProducts()
+        await fetchProducts(mlsServiceKey: mlsServiceKey)
     }
 }

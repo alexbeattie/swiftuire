@@ -111,6 +111,7 @@ struct Value: Codable, Equatable, Identifiable {
     var StreetName: String?
     var MemberKey: String?
     var Association_sp_Information_co_Association_sp_Name: String?
+    var MlsId: String?
 //    let price: Decimal?
 
 //    var formattedLaunchDate: String {

@@ -5,56 +5,47 @@ import Kingfisher
 struct PopDetailsView: View {
     let value: Value
     @State private var selectedAnnotation: MKAnnotation?
-//    @State private var presentAlert = false
     @State private var directionsMapItem: MKMapItem?
     @State private var showDirections = false
     @State private var region: MKCoordinateRegion
-
-//    @Environment(\.dismiss) var dismiss
     @State private var isFullScreen = false
     
-
     init(value: Value) {
         self.value = value
         self._region = State(initialValue: MKCoordinateRegion(center: .init(latitude: value.Latitude ?? 0, longitude: value.Longitude ?? 0), span: .init(latitudeDelta: 0.1, longitudeDelta: 0.1)))
     }
     
     var body: some View {
-            VStack {
-                ScrollView(showsIndicators: false) {
-                    VStack {
-                        ImageCarouselView(media: value.Media ?? [])
-                            .frame(height: 320)
-                        
-                        PropertyDetailsView(value: value)
-                            .padding(.horizontal)
-                        
-                        Spacer()
-                        
-                        
-                      
-                        
-                        PropertyDescriptionView(value: value)
-                            .padding()
-                        
-                        Divider()
-                        MapView(value: value, selectedAnnotation: $selectedAnnotation, directionsMapItem: $directionsMapItem)
-                            .frame(height: 200)
-                            .clipShape(RoundedRectangle(cornerRadius:12))
-                            .edgesIgnoringSafeArea(.bottom)
-                    }
+        GeometryReader { geometry in
+            ScrollView {
+                VStack {
+                    ImageCarouselView(media: value.Media ?? [])
+                        .frame(height: 320)
+                    
+                    PropertyDetailsView(value: value)
+                        .padding(.horizontal)
+                    
+                    Spacer()
+                    
+                    PropertyDescriptionView(value: value)
+                        .padding()
+                    
+                    Divider()
+                    
+                    MapView(value: value, selectedAnnotation: $selectedAnnotation, directionsMapItem: $directionsMapItem)
+                        .frame(height: 200)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .padding(.horizontal)
+                    
+                    Spacer()
                 }
-//                MapView(value: value)
-//                    .frame(height:200)
-//                    .clipShape(RoundedRectangle(cornerRadius:12))
-//                    .edgesIgnoringSafeArea(.bottom)
-
-           
+                .padding(.bottom, geometry.safeAreaInsets.bottom)
             }
-            .edgesIgnoringSafeArea(.bottom)
-        
+            .edgesIgnoringSafeArea(.all)
+
         }
     }
+}
 struct ImageCarouselView: View {
     let media: [Value.Media]
     

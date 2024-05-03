@@ -20,6 +20,8 @@ struct NewAPIApp: App {
         WindowGroup {
             
             MainTabView()
+                .preferredColorScheme(.dark)
+
         }
     }
 }

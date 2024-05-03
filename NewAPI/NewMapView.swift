@@ -16,7 +16,7 @@ class SoldListingsViewModel: ObservableObject {
     private let baseURL = "https://replication.sparkapi.com/Reso/OData/Property"
     private let token = TOKEN
     private var currentPage = 0
-    let itemsPerPage = 10
+    let itemsPerPage = 30
     var listAgentKey = "20160917171119703445000000"
     var otherAgentKey = "20160917171113923841000000"
     var fenton = "20220924045922314237000000"
@@ -28,7 +28,7 @@ class SoldListingsViewModel: ObservableObject {
         isLoading = true
         
         let queryItems = [
-            URLQueryItem(name: "$filter", value: "ListAgentKey eq '\(pm)' and StandardStatus eq 'Closed' and StandardStatus ne 'Expired' and StandardStatus ne 'Canceled'"),
+            URLQueryItem(name: "$filter", value: "ListAgentKey eq '\(listAgentKey)' and StandardStatus eq 'Closed' and StandardStatus ne 'Expired' and StandardStatus ne 'Canceled'"),
             URLQueryItem(name: "$orderby", value: "ListPrice desc"),
             URLQueryItem(name: "$top", value: "\(itemsPerPage)"),
             URLQueryItem(name: "$skip", value: "\(currentPage * itemsPerPage)"),
@@ -75,7 +75,8 @@ class SoldListingsViewModel: ObservableObject {
                 
                 let fetchedData = try decoder.decode(Listing.self, from: data)
                 let annotations = fetchedData.value?.compactMap { anno -> SoldListingsAnno? in
-                    let title = anno.UnparsedAddress
+                    let title = "\(anno.StreetNumber ?? "") \(anno.StreetName ?? "")"
+
                     let address = anno.UnparsedAddress // Extract the address value
                     let listPrice = anno.ListPrice // Extract the list price value
                     let lat = anno.Latitude
@@ -84,7 +85,7 @@ class SoldListingsViewModel: ObservableObject {
                     let imageURL = URL(string: anno.Media?.first?.MediaURL ?? "")
                     let coordinate = CLLocationCoordinate2D(latitude: lat ?? 0, longitude: lon ?? 0)
                     
-                    return SoldListingsAnno(title: title ?? "", coordinate: coordinate, subtitle: subTitle ?? 0, imageURL: imageURL, address: address ?? "", listPrice: listPrice ?? 0)
+                    return SoldListingsAnno(title: title, coordinate: coordinate, subtitle: subTitle ?? 0, imageURL: imageURL, address: address ?? "", listPrice: listPrice ?? 0)
                 }
                 
                 DispatchQueue.main.async {
@@ -124,21 +125,18 @@ struct SoldLocationCell: View {
             } placeholder: {
                 ProgressView()
             }
-            Spacer()
             
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .trailing, spacing: 24) {
                 Text(item.title)
-                    .font(.system(size: 16, weight: .bold))
+                    .font(.system(size: 16, weight: .regular))
                 
-                    .lineLimit(1)
+                    .lineLimit(2)
                     .foregroundColor(.black)
                 
                 
-                Text(item.formattedPrice)
-                    .font(.system(size: 14))
-                    .foregroundColor(.black)
                 
             }
+
             .padding(.all, 16)
         }
         .background(Color.white)

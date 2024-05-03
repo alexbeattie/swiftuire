@@ -13,12 +13,14 @@ struct ContentView: View {
             NavigationView {
                 ScrollView {
                     VStack {
+                        
                         ForEach(vm.results, id: \.ListingKey) { listing in
                             NavigationLink {
                                 NavigationLazyView(PopDetailsView(value: listing))
                             } label: {
                                 VStack(alignment: .leading) {
                                     HStack {
+                            
                                         AsyncImage(url: URL(string: listing.Media?.first?.MediaURL ?? "")) { phase in
                                             switch phase {
                                             case .success(let image):
@@ -32,16 +34,16 @@ struct ContentView: View {
                                                     }
                                             case .failure(_):
                                                 ProgressView()
-                                                        .frame(width: 50, height: 50)
-                                                        .progressViewStyle(CircularProgressViewStyle())
-                                                        .onAppear {
-                                                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                                                                // Retry loading the image after a 1-second delay
-                                                                // You can adjust the delay as needed
-                                                                vm.objectWillChange.send()
-                                                            }
+                                                    .frame(width: 50, height: 50)
+                                                    .progressViewStyle(CircularProgressViewStyle())
+                                                    .onAppear {
+                                                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                                                            // Retry loading the image after a 1-second delay
+                                                            // You can adjust the delay as needed
+                                                            vm.objectWillChange.send()
                                                         }
-                                            
+                                                    }
+                                                
                                             case .empty:
                                                 ZStack {
                                                     Color.black
@@ -62,6 +64,7 @@ struct ContentView: View {
                                     }
                                 }
                             }
+                            
                             .padding(.bottom)
                         }
                         
@@ -72,17 +75,17 @@ struct ContentView: View {
                             HStack {
                                 Button(action: {
                                     Task {
-                                        await vm.fetchNextPage()
+                                        await vm.fetchNextPage(mlsServiceKey: vm.mlsClaw)
                                     }
                                     
                                 }) {
                                     Label("Load More", systemImage: "arrow.forward")
                                         .font(.system(size: 14, weight: .regular))
                                         .foregroundColor(.gray)
-
-//                                    Text("Load More")
-//                                        .padding(EdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10))
-                            }
+                                    
+                                    //                                    Text("Load More")
+                                    //                                        .padding(EdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10))
+                                }
                             }
                             .padding(EdgeInsets(top: 10, leading: 10, bottom: 100, trailing: 10))
                         }
@@ -93,7 +96,9 @@ struct ContentView: View {
             }
         }
         .task {
-            await vm.fetchProducts()
+            await vm.fetchAllMlsServices()
+
+//            await vm.fetchProducts()
         }
     }
 }
@@ -181,6 +186,9 @@ struct ListingDetailsView: View {
                     .frame(minWidth: nil, idealWidth: nil, maxWidth: .infinity, minHeight: nil, idealHeight: nil, maxHeight: .infinity, alignment: .center)
             }
             Text(listing.ListAgentFullName ?? "")
+                .font(.system(size: 14, weight: .regular))
+                .foregroundColor(.gray)
+            Text(listing.CoListAgentFullName ?? "")
                 .font(.system(size: 14, weight: .regular))
                 .foregroundColor(.gray)
 
